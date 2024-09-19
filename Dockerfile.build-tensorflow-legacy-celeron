@@ -1,0 +1,13 @@
+FROM tensorflow/build:2.13-python3.9 AS build-tensorflow-legacy-celeron
+ENV TENSORFLOW_VERSION=v2.13.1   
+ENV DEBIAN_FRONTEND=noninteractive    
+ARG BUILD_DEPENDENCIES="patchelf"
+RUN apt -y update && \
+    apt install -y ${BUILD_DEPENDENCIES} && \
+    rm -rf /var/lib/apt/lists/* && rm -rf /tmp/*
+
+RUN git clone https://github.com/tensorflow/tensorflow.git && mkdir -p /wheels/tensorflow
+WORKDIR tensorflow
+RUN git checkout $TENSORFLOW_VERSION
+RUN bazel build -c opt --copt=-mno-avx2 --copt=-march=nehalem --verbose_failures //tensorflow/tools/pip_package:build_pip_package
+RUN /tensorflow/bazel-bin/tensorflow/tools/pip_package/build_pip_package /wheels/tensorflow

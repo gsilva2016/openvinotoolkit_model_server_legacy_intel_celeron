@@ -1,0 +1,43 @@
+# https://github.com/openvinotoolkit/model_server/blob/main/demos/benchmark/python/Dockerfile
+
+FROM ubuntu:22.04 AS src
+ENV DEBIAN_FRONTEND=noninteractive    
+USER root
+ARG BUILD_DEPENDENCIES="git"
+RUN apt -y update && \
+    apt install -y ${BUILD_DEPENDENCIES} && \
+    rm -rf /var/lib/apt/lists/* && rm -rf /tmp/*
+RUN git clone https://github.com/openvinotoolkit/model_server
+
+FROM haproxy:2.8.2
+ENV DEBIAN_FRONTEND=noninteractive    
+USER root
+ARG BUILD_DEPENDENCIES="git python3 python3-pip curl "
+RUN apt -y update && \
+    apt install -y ${BUILD_DEPENDENCIES} && \
+    rm -rf /var/lib/apt/lists/* && rm -rf /tmp/*
+COPY --from=src /model_server/demos/benchmark/python/requirements.txt .
+RUN python3 -m pip install --no-cache -r requirements.txt
+COPY tensorflow-2.13.1-cp39-cp39-linux_x86_64.whl .
+RUN pip3 install tensorflow-2.13.1-cp39-cp39-linux_x86_64.whl
+
+ENV TF_CPP_MIN_LOG_LEVEL=2
+
+RUN mkdir -p /ovms_benchmark_client
+COPY --from=src /model_server/demos/benchmark/python/main.py /ovms_benchmark_client
+COPY --from=src /model_server/demos/benchmark/python/client.py /ovms_benchmark_client
+COPY --from=src /model_server/demos/benchmark/python/client_tfs.py /ovms_benchmark_client
+COPY --from=src /model_server/demos/benchmark/python/client_kfs.py /ovms_benchmark_client
+COPY --from=src /model_server/demos/benchmark/python/metrics.py /ovms_benchmark_client
+COPY --from=src /model_server/demos/benchmark/python/db_exporter.py /ovms_benchmark_client
+COPY --from=src /model_server/demos/benchmark/python/__init__.py /ovms_benchmark_client
+COPY --from=src /model_server/demos/benchmark/python/entrypoint.sh /
+
+RUN mkdir -p /haproxy
+COPY --from=src /model_server/demos/benchmark/python/haproxy.cfg /haproxy
+EXPOSE 11888
+
+RUN chmod +x /ovms_benchmark_client/main.py
+ENV PYTHONPATH "${PYTHONPATH}:/ovms_benchmark_client"
+ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]
+
