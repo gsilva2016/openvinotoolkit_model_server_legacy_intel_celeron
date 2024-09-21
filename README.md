@@ -15,6 +15,14 @@ Building TensorFlow requires lots of CPU time. Building on an Intel Xeon will tr
 
 After the build completes copy the generated /wheels/tensorflow/tensorflow-2.13.1-cp39-cp39-linux_x86_64.whl from the Docker image build-tensorflow-legacy-celeron to the target Intel Celeron system
 
+```
+docker run -v `pwd`:/savedir build-tensorflow-legacy-celeron /usr/bin/cp /wheels/tensorflow/tensorflow-2.13.1-cp39-cp39-linux_x86_64.whl /savedir
+ls -l *.whl
+```
+
+-rw-r--r-- 1 root root 214453809 Sep 20 18:59 tensorflow-2.13.1-cp39-cp39-linux_x86_64.whl
+
+
 <b>Celeron Steps</b>
 
 Ensure the tensorflow-2.13.1-cp39-cp39-linux_x86_64.whl is in the current directory.
