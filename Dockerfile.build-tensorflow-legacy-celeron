@@ -1,4 +1,5 @@
-FROM tensorflow/build:2.13-python3.9 AS build-tensorflow-legacy-celeron
+ARG TF_IMAGE
+FROM $TF_IMAGE as build-tensorflow-legacy-celeron
 ENV TENSORFLOW_VERSION=v2.13.1   
 ENV DEBIAN_FRONTEND=noninteractive    
 ARG BUILD_DEPENDENCIES="patchelf"

@@ -18,8 +18,9 @@ RUN apt -y update && \
 
 COPY --from=src /model_server/demos/benchmark/python/requirements.txt .
 RUN python3 -m pip install --no-cache -r requirements.txt
-COPY --from=build-tensorflow-legacy-celeron /wheels/tensorflow/tensorflow-2.13.1-cp39-cp39-linux_x86_64.whl .
-RUN pip3 install tensorflow-2.13.1-cp39-cp39-linux_x86_64.whl
+ARG PKG_NAME
+COPY --from=build-tensorflow-legacy-celeron /wheels/tensorflow/$PKG_NAME .
+RUN pip3 install $PKG_NAME
 
 ENV TF_CPP_MIN_LOG_LEVEL=2
 
