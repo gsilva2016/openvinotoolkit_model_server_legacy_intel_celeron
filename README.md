@@ -5,33 +5,35 @@ OpenVINO Model Server benchmark_client application requires TensorFlow. However,
 
 ## Cross Compile Build (Fast Method)
 
-Building TensorFlow requires lots of CPU time. Building on an Intel Xeon will tremendously reduce the build time.
+Building TensorFlow requires lots of CPU time. Building on an Intel Xeon and after deploying on an Intel Celeron platform will tremendously reduce the build time.
 
 <b>Xeon Steps</b>
+
+Default build will use: TF_IMAGE="tensorflow/build:2.13-python3.9"
 
 ```
 ./build-client.sh build_tensorflow_only
 ```
 
-After the build completes copy the generated /wheels/tensorflow/tensorflow-2.13.1-cp39-cp39-linux_x86_64.whl from the Docker image build-tensorflow-legacy-celeron to the target Intel Celeron system
+To specify a different Python and Tensorflow version:
 
 ```
-docker run -v `pwd`:/savedir build-tensorflow-legacy-celeron /usr/bin/cp /wheels/tensorflow/tensorflow-2.13.1-cp39-cp39-linux_x86_64.whl /savedir
-ls -l *.whl
+TF_IMAGE="tensorflow/build:2.13-python3.10" ./build-client.sh build_tensorflow_only
 ```
 
--rw-r--r-- 1 root root 214453809 Sep 20 18:59 tensorflow-2.13.1-cp39-cp39-linux_x86_64.whl
+After the build completes copy the generated tensorflow-*.whl to the target Intel Celeron system
 
+-rw-r--r-- 1 who who 214453809 Sep 20 18:59 tensorflow-2.13.1-cp310-cp310-linux_x86_64.whl
 
 <b>Celeron Steps</b>
 
-Ensure the tensorflow-2.13.1-cp39-cp39-linux_x86_64.whl is in the current directory.
+Ensure the tensorflow-2.13.1-cp39-cp39-linux_x86_64.whl is in the current directory. Running the below step will build the OVMS benchmark_client application and utilize the .whl file.
 
 ```
 ./build-client.sh from_binary
 ```
 
-## Single System Compile (Slow Method)
+## Single System Compile and Install (Slow Method)
 
 <b>Celeron Steps</b>
 
